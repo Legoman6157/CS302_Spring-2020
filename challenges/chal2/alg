@@ -1,0 +1,9 @@
+What I need to do:
+	-Given an unsorted list of integers, find the pair with the smallest difference.
+
+How to go about it:
+	-Sort all of the integers, then get all of the pairs.
+		-I could do this by keeping a variable for keeping track of the smallest pair difference.
+		-This way also ensures that I'll find it because a sorted order means the smallest
+			possible difference between any two neighboring numbers.
+	-
