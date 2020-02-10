@@ -1,0 +1,5 @@
+Heap's node:
+	-Left = 2*i+1
+	-Right = 2*i+2
+	-Parent = (i-1)/2
+	-Last parent = (N-1)/2
