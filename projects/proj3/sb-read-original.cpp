@@ -81,28 +81,20 @@ Superball::Superball(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	Superball *s;
-
 	int i, j;
-	//Number of goal pieces and total score of all goal pieces
 	int ngoal, tgoal;
  
 	s = new Superball(argc, argv);
 
 	tgoal = 0;
 	ngoal = 0;
-
-	//For all pixels in board,
 	for (i = 0; i < s->r*s->c; i++) {
-		//If it's a goal piece and it's not an empty space,
 		if (s->goals[i] && s->board[i] != '*') {
-			//Add score of piece to total score sum
 			tgoal += s->colors[s->board[i]];
-			//Incerement number of goal pieces
 			ngoal++;
-		}//if (s->goals[i] && s->board[i] != '*')
-	}//for (i < s->r*s->c)
+		}
+	}
 
-	//Print out data
 	printf("Empty cells:			%2d\n", s->empty);
 	printf("Non-Empty cells:		%2d\n", s->r*s->c - s->empty);
 	printf("Number of pieces in goal cells:	%2d\n", ngoal);
