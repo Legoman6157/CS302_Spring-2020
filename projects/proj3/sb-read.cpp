@@ -8,6 +8,14 @@ using namespace std;
 
 #define talloc(type, num) (type *) malloc(sizeof(type)*(num))
 
+struct pixel {
+	int x;
+	int y;
+
+	pixel() {};
+	pixel(int n_x, int n_y): x(n_x), y(n_y) {};
+};//pixel
+
 class Superball {
 	public:
 		Superball(int argc, char **argv);
@@ -41,8 +49,7 @@ Superball::Superball(int argc, char **argv)
 	colors.resize(256, 0);
 
 	for (i = 0; i < strlen(argv[4]); i++) {
-		if (!isalpha(argv[4][i])) usage("Colors must be distinct letters");
-		if (!islower(argv[4][i])) usage("Colors must be lowercase letters");
+
 		if (colors[argv[4][i]] != 0) usage("Duplicate color");
 		colors[argv[4][i]] = 2+i;
 		colors[toupper(argv[4][i])] = 2+i;
@@ -78,16 +85,15 @@ Superball::Superball(int argc, char **argv)
 	}
 }
 
-int main(int argc, char **argv)
+std::vector<pixel> read_data(int argc, char **argv, Superball *s)
 {
-	Superball *s;
+	std::vector<pixel> goal_pieces;
 
 	int i, j;
+
 	//Number of goal pieces and total score of all goal pieces
 	int ngoal, tgoal;
  
-	s = new Superball(argc, argv);
-
 	tgoal = 0;
 	ngoal = 0;
 
@@ -95,10 +101,16 @@ int main(int argc, char **argv)
 	for (i = 0; i < s->r*s->c; i++) {
 		//If it's a goal piece and it's not an empty space,
 		if (s->goals[i] && s->board[i] != '*') {
+
+			//Push it to the vector containing goal pieces.
+			goal_pieces.push_back(pixel(i/s->c, i%s->c));
+
 			//Add score of piece to total score sum
 			tgoal += s->colors[s->board[i]];
+
 			//Incerement number of goal pieces
 			ngoal++;
+
 		}//if (s->goals[i] && s->board[i] != '*')
 	}//for (i < s->r*s->c)
 
@@ -107,6 +119,7 @@ int main(int argc, char **argv)
 	printf("Non-Empty cells:		%2d\n", s->r*s->c - s->empty);
 	printf("Number of pieces in goal cells:	%2d\n", ngoal);
 	printf("Sum of their values:		%2d\n", tgoal);
-	exit(0);
+
+	return goal_pieces;
 }
 
