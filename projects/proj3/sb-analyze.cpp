@@ -18,9 +18,11 @@ struct dset {
 	int score;
 };//dset
 
-std::vector<dset> get_dsets(Superball *s, std::vector<pixel> goal_pieces) {
+std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 
 	DisjointSetByRankWPC ds(s->r*s->c);
+
+	std::vector<pixel> goal_pieces = read_data(argc, argv, s);
 
 	//Vector of disjoint sets to return
 	std::vector<dset> dsets;
@@ -129,28 +131,3 @@ std::vector<dset> get_dsets(Superball *s, std::vector<pixel> goal_pieces) {
 
 	return dsets;
 }//find_dsets(read_data rd)
-
-void sb_analyze();
-
-int main(int argc, char **argv)
-{
-	Superball *s;
-
-	s = new Superball(argc, argv);
-
-	std::vector<pixel> goal_pieces = read_data(argc, argv, s);
-
-	std::vector<dset> dsets = get_dsets(s, goal_pieces);
-
-
-	for (int i = 0; i < dsets.size(); i++) {
-		std::printf("Size: %3d  Character: %2c  Scoring cell: (%d,%d)\n",
-			dsets[i].pixels.size(),
-			dsets[i].piece,
-			dsets[i].pixels[0].x,
-			dsets[i].pixels[0].y
-		);
-
-	}//for (i < dsets.size())
-
-}//main
