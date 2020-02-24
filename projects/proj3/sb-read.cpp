@@ -87,7 +87,7 @@ Superball::Superball(int argc, char **argv)
 
 std::vector<pixel> read_data(int argc, char **argv, Superball *s)
 {
-	std::vector<pixel> goal_pieces;
+	std::vector<pixel> pieces;
 
 	int i, j;
 
@@ -103,7 +103,7 @@ std::vector<pixel> read_data(int argc, char **argv, Superball *s)
 		if (s->goals[i] && s->board[i] != '*') {
 
 			//Push it to the vector containing goal pieces.
-			goal_pieces.push_back(pixel(i/s->c, i%s->c));
+			pieces.push_back(pixel(i/s->c, i%s->c));
 
 			//Add score of piece to total score sum
 			tgoal += s->colors[s->board[i]];
@@ -120,6 +120,6 @@ std::vector<pixel> read_data(int argc, char **argv, Superball *s)
 	printf("Number of pieces in goal cells:	%2d\n", ngoal);
 	printf("Sum of their values:		%2d\n", tgoal);
 
-	return goal_pieces;
+	return pieces;
 }
 

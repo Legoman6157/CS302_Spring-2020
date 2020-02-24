@@ -38,9 +38,12 @@ std::vector<dset> find_dsets(Superball *s, DisjointSetByRankWPC ds, std::vector<
 	for (int i = 0; i < goal_pieces.size(); i++) {
 		dfs_stack.push(goal_pieces[i]);
 
+		temp_dset.pixels.clear();
 		temp_dset.pixels.push_back(goal_pieces[i]);
 
-		std::cout << "Current goal piece: (" << goal_pieces[i].x << ", " << goal_pieces[i].y << ')' << std::endl; 
+//		std::cout << "Current goal piece: (" << goal_pieces[i].x << ", " << goal_pieces[i].y << ')' << std::endl; 
+
+		temp_dset.size = 1;
 
 		while (!dfs_stack.empty()) {
 			curr_pixel = dfs_stack.top();
@@ -53,18 +56,18 @@ std::vector<dset> find_dsets(Superball *s, DisjointSetByRankWPC ds, std::vector<
 			west_loc = (curr_pixel.x) * s->c + (curr_pixel.y-1);
 			south_loc = (curr_pixel.x+1) * s->c + (curr_pixel.y);
 
-			std::cout << "Current pixel: (" << curr_pixel.x << ',' << curr_pixel.y << ')' << std::endl;
-			std::cout << "Current location: " << curr_pixel_loc << std::endl;
-			std::cout << "\tN: " << north_loc << std::endl;
-			std::cout << "\tE: " << east_loc << std::endl;
-			std::cout << "\tW: " << west_loc << std::endl;
-			std::cout << "\tS: " << south_loc << std::endl;
+//			std::cout << "Current pixel: (" << curr_pixel.x << ',' << curr_pixel.y << ')' << std::endl;
+//			std::cout << "Current location: " << curr_pixel_loc << std::endl;
+//			std::cout << "\tN: " << north_loc << std::endl;
+//			std::cout << "\tE: " << east_loc << std::endl;
+//			std::cout << "\tW: " << west_loc << std::endl;
+//			std::cout << "\tS: " << south_loc << std::endl;
 
 			//N
 			if ( (curr_pixel.x > 0)
 					&& (ds.Find(north_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[north_loc] == s->board[curr_pixel_loc]) ) {
-std::cout << "N" << std::endl;
+//std::cout << "N" << std::endl;
 				ds.Union(ds.Find(north_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = north_loc/s->c;
@@ -72,6 +75,7 @@ std::cout << "N" << std::endl;
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
+				temp_dset.size++;
 			}
 
 			//E
@@ -79,7 +83,7 @@ std::cout << "N" << std::endl;
 					&& (ds.Find(east_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[east_loc] == s->board[curr_pixel_loc]) ) {
 
-std::cout << "E" << std::endl;
+//std::cout << "E" << std::endl;
 				ds.Union(ds.Find(east_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = east_loc/s->c;
@@ -87,6 +91,7 @@ std::cout << "E" << std::endl;
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
+				temp_dset.size++;
 			}
 
 			//W
@@ -94,7 +99,7 @@ std::cout << "E" << std::endl;
 					&& (ds.Find(west_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[west_loc] == s->board[curr_pixel_loc]) ) {
 
-std::cout << "W" << std::endl;
+//std::cout << "W" << std::endl;
 				ds.Union(ds.Find(west_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = west_loc/s->c;
@@ -102,6 +107,7 @@ std::cout << "W" << std::endl;
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
+				temp_dset.size++;
 			}
 
 			//S
@@ -109,7 +115,7 @@ std::cout << "W" << std::endl;
 					&& (ds.Find(south_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[south_loc] == s->board[curr_pixel_loc]) ) {
 
-std::cout << "S" << std::endl;
+//std::cout << "S" << std::endl;
 					ds.Union(ds.Find(south_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = south_loc/s->c;
@@ -117,21 +123,16 @@ std::cout << "S" << std::endl;
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
+				temp_dset.size++;
 			}
 		}//while (!dfs_stack.empty())
 
-	//	for (auto it2 : temp_dset.pixels)
-	//		std::cout << it2.x << ' ' << it2.y << std::endl;
 
+		if (((temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y)) == ds.Find((temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y)))
+			dsets.push_back(temp_dset);
 
-		dsets.push_back(temp_dset);
-
-		temp_dset.size = 0;
-		temp_dset.pixels.clear();
-
-			std::cout << std::endl;
+//			std::cout << std::endl;
 	}//for (i < goal_pieces.size())
-
 
 	return dsets;
 }//find_dsets(read_data rd)
@@ -161,15 +162,14 @@ int main(int argc, char **argv)
 	
 	std::vector<dset> dsets = find_dsets(s, ds, goal_pieces);
 
-	/*for (auto it_dsets : dsets) {
-		std::cout << it_dsets.size << std::endl;
-		for (auto it_dsets_pixels : it_dsets.pixels)
-			std::cout
-				<< '('
-				<< it_dsets_pixels.x
-				<< ','
-				<< it_dsets_pixels.y
-				<< ')'
-				<< std::endl;
-	}*/
+
+	std::cout << "Number of disjoint sets: " << dsets.size() << std::endl;
+	for (int i = 0; i < dsets.size(); i++) {
+		std::cout << "Disjoint set " << i << ": Size = " << dsets[i].pixels.size() << std::endl;
+		for (auto it : dsets[i].pixels)
+			std::cout << '(' << it.x << ", " << it.y << ')' << std::endl;
+
+		std::cout << std::endl;
+	}
+
 }
