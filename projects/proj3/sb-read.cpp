@@ -114,12 +114,6 @@ std::vector<pixel> read_data(int argc, char **argv, Superball *s)
 		}//if (s->goals[i] && s->board[i] != '*')
 	}//for (i < s->r*s->c)
 
-	//Print out data
-	printf("Empty cells:			%2d\n", s->empty);
-	printf("Non-Empty cells:		%2d\n", s->r*s->c - s->empty);
-	printf("Number of pieces in goal cells:	%2d\n", ngoal);
-	printf("Sum of their values:		%2d\n", tgoal);
-
 	return pieces;
 }
 

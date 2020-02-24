@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
-#include <iostream>
 #include <stack>
 #include <vector>
 
@@ -14,19 +13,26 @@ using namespace std;
 #define talloc(type, num) (type *) malloc(sizeof(type)*(num))
 
 struct dset {
-	int size;
-	int score;
+	char piece;
 	std::vector<pixel> pixels;
+	int score;
 };//dset
 
-std::vector<dset> find_dsets(Superball *s, DisjointSetByRankWPC ds, std::vector<pixel> goal_pieces) {
+std::vector<dset> get_dsets(Superball *s, std::vector<pixel> goal_pieces) {
 
+	DisjointSetByRankWPC ds(s->r*s->c);
+
+	//Vector of disjoint sets to return
 	std::vector<dset> dsets;
 
+	//Stack for dfs traversal of the board
 	std::stack<pixel> dfs_stack;
+
+	//Pixel for traversal and 
 	pixel curr_pixel,
 			temp_pixel;
 
+	//Buffer dset for putting into dsets vector
 	dset temp_dset;
 
 	int curr_pixel_loc,
@@ -41,33 +47,24 @@ std::vector<dset> find_dsets(Superball *s, DisjointSetByRankWPC ds, std::vector<
 		temp_dset.pixels.clear();
 		temp_dset.pixels.push_back(goal_pieces[i]);
 
-//		std::cout << "Current goal piece: (" << goal_pieces[i].x << ", " << goal_pieces[i].y << ')' << std::endl; 
-
-		temp_dset.size = 1;
+		temp_dset.piece = s->board[(goal_pieces[i].x) * s->c + (goal_pieces[i].y)];
 
 		while (!dfs_stack.empty()) {
 			curr_pixel = dfs_stack.top();
 			dfs_stack.pop();
 
-			
+			//Set location of current pixel and possible "movements" for traversal
 			curr_pixel_loc = (curr_pixel.x) * s->c + (curr_pixel.y);
 			north_loc = (curr_pixel.x-1) * s->c + (curr_pixel.y);
 			east_loc = (curr_pixel.x) * s->c + (curr_pixel.y+1);
 			west_loc = (curr_pixel.x) * s->c + (curr_pixel.y-1);
 			south_loc = (curr_pixel.x+1) * s->c + (curr_pixel.y);
 
-//			std::cout << "Current pixel: (" << curr_pixel.x << ',' << curr_pixel.y << ')' << std::endl;
-//			std::cout << "Current location: " << curr_pixel_loc << std::endl;
-//			std::cout << "\tN: " << north_loc << std::endl;
-//			std::cout << "\tE: " << east_loc << std::endl;
-//			std::cout << "\tW: " << west_loc << std::endl;
-//			std::cout << "\tS: " << south_loc << std::endl;
-
-			//N
+			//(N) Check North
 			if ( (curr_pixel.x > 0)
 					&& (ds.Find(north_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[north_loc] == s->board[curr_pixel_loc]) ) {
-//std::cout << "N" << std::endl;
+
 				ds.Union(ds.Find(north_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = north_loc/s->c;
@@ -75,15 +72,13 @@ std::vector<dset> find_dsets(Superball *s, DisjointSetByRankWPC ds, std::vector<
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
-				temp_dset.size++;
 			}
 
-			//E
+			//(E) Check East
 			if ( (curr_pixel.y < s->c-1)
 					&& (ds.Find(east_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[east_loc] == s->board[curr_pixel_loc]) ) {
 
-//std::cout << "E" << std::endl;
 				ds.Union(ds.Find(east_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = east_loc/s->c;
@@ -91,15 +86,13 @@ std::vector<dset> find_dsets(Superball *s, DisjointSetByRankWPC ds, std::vector<
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
-				temp_dset.size++;
 			}
 
-			//W
+			//(W) Check Weast
 			if ( (curr_pixel.y > 0)
 					&& (ds.Find(west_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[west_loc] == s->board[curr_pixel_loc]) ) {
 
-//std::cout << "W" << std::endl;
 				ds.Union(ds.Find(west_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = west_loc/s->c;
@@ -107,32 +100,32 @@ std::vector<dset> find_dsets(Superball *s, DisjointSetByRankWPC ds, std::vector<
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
-				temp_dset.size++;
 			}
 
-			//S
+			//(S) Check South
 			if ( (curr_pixel.x < s->r-1)
 					&& (ds.Find(south_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[south_loc] == s->board[curr_pixel_loc]) ) {
 
-//std::cout << "S" << std::endl;
-					ds.Union(ds.Find(south_loc), ds.Find(curr_pixel_loc));
+				ds.Union(ds.Find(south_loc), ds.Find(curr_pixel_loc));
 
 				temp_pixel.x = south_loc/s->c;
 				temp_pixel.y = south_loc%s->c;
 
 				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
-				temp_dset.size++;
 			}
 		}//while (!dfs_stack.empty())
 
+		curr_pixel_loc = (temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y);
 
-		if (((temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y)) == ds.Find((temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y)))
+		if (curr_pixel_loc == ds.Find(curr_pixel_loc) && temp_dset.pixels.size() >= 5) {
+			temp_dset.score = s->colors[temp_dset.piece] * temp_dset.pixels.size();
 			dsets.push_back(temp_dset);
+		}
 
-//			std::cout << std::endl;
 	}//for (i < goal_pieces.size())
+
 
 	return dsets;
 }//find_dsets(read_data rd)
@@ -142,34 +135,22 @@ void sb_analyze();
 int main(int argc, char **argv)
 {
 	Superball *s;
- 
-	s = new Superball(argc, argv);
 
-	DisjointSetByRankWPC ds(s->r*s->c);
+	s = new Superball(argc, argv);
 
 	std::vector<pixel> goal_pieces = read_data(argc, argv, s);
 
-	/*for (auto it : goal_pieces)
-		std::cout
-		<< '('
-		<< it.x
-		<< ','
-		<< it.y
-		<< ')'
-		<< ": "
-		<< s->board[it.x * s->c + it.y]
-		<< std::endl;*/
-	
-	std::vector<dset> dsets = find_dsets(s, ds, goal_pieces);
+	std::vector<dset> dsets = get_dsets(s, goal_pieces);
 
 
-	std::cout << "Number of disjoint sets: " << dsets.size() << std::endl;
 	for (int i = 0; i < dsets.size(); i++) {
-		std::cout << "Disjoint set " << i << ": Size = " << dsets[i].pixels.size() << std::endl;
-		for (auto it : dsets[i].pixels)
-			std::cout << '(' << it.x << ", " << it.y << ')' << std::endl;
+		std::printf("Size: %3d  Character: %2c  Scoring cell: (%d,%d)\n",
+			dsets[i].pixels.size(),
+			dsets[i].piece,
+			dsets[i].pixels[0].x,
+			dsets[i].pixels[0].y
+		);
 
-		std::cout << std::endl;
-	}
+	}//for (i < dsets.size())
 
-}
+}//main
