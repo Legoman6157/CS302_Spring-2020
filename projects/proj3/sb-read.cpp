@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
+#include <fstream>
 #include <iostream>
 #include <vector>
 using namespace std;
@@ -26,6 +27,11 @@ class Superball {
 		vector <int> board;
 		vector <int> goals;
 		vector <int> colors;
+};
+
+struct read_data {
+	Superball *s;
+	std::vector<pixel> goal_pieces; 
 };
 
 void usage(const char *s) 
@@ -85,7 +91,7 @@ Superball::Superball(int argc, char **argv)
 	}
 }
 
-std::vector<pixel> read_data(int argc, char **argv, Superball *s)
+std::vector<pixel> sb_read(int argc, char **argv, Superball *s)
 {
 	std::vector<pixel> pieces;
 
@@ -114,6 +120,17 @@ std::vector<pixel> read_data(int argc, char **argv, Superball *s)
 		}//if (s->goals[i] && s->board[i] != '*')
 	}//for (i < s->r*s->c)
 
+	printf("Empty cells:                    %2d\n", s->empty);
+	printf("Non-Empty cells:                %2d\n", s->r*s->c - s->empty);
+	printf("Number of pieces in goal cells: %2d\n", ngoal);
+	printf("Sum of their values:            %2d\n", tgoal);
+
 	return pieces;
 }
 
+int main(int argc, char* argv[]) {
+	std::ofstream o_f("read-output");
+	for(int i = 0; i < argc; i++)
+		o_f << argv[i] << std::endl;
+	o_f.close();
+}

@@ -2,11 +2,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
+#include <fstream>
+#include <iostream>
 #include <stack>
 #include <vector>
 
-#include "sb-read.cpp"
-#include "disjoint_by_rank.cpp"
+#include "disjoint.h"
 
 using namespace std;
 
@@ -14,15 +15,14 @@ using namespace std;
 
 struct dset {
 	char piece;
-	std::vector<pixel> pixels;
+//	std::vector<pixel> pixels;
 	int score;
 };//dset
-
+/*
 std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
-
 	DisjointSetByRankWPC ds(s->r*s->c);
 
-	std::vector<pixel> goal_pieces = read_data(argc, argv, s);
+	std::vector<pixel> goal_pieces = sb_read(argc, argv, s);
 
 	//Vector of disjoint sets to return
 	std::vector<dset> dsets;
@@ -128,6 +128,22 @@ std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 
 	}//for (i < goal_pieces.size())
 
+for (int i = 0; i < dsets.size(); i++) {
+		std::printf("Size: %3d  Character: %2c  Scoring cell: (%d,%d)\n",
+			dsets[i].pixels.size(),
+			dsets[i].piece,
+			dsets[i].pixels[0].x,
+			dsets[i].pixels[0].y
+		);
+	}//for (i < dsets.size())
+
 
 	return dsets;
-}//find_dsets(read_data rd)
+}//find_dsets(read_data rd)*/
+
+int main(int argc, char* argv[]) {
+	std::ofstream o_f ("analyze_output");
+	for(int i = 0; i < argc; i++)
+		o_f << argv[i] << std::endl;
+	o_f.close();
+}

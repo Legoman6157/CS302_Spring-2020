@@ -6,25 +6,36 @@
 #include <vector>
 using namespace std;
 
-#include "sb-analyze.cpp"
+//#include "sb-analyze.cpp"
 
 #define talloc(type, num) (type *) malloc(sizeof(type)*(num))
 
+
 int main(int argc, char **argv)
 {
-	Superball *s;
+//	Superball *s;
 
-	s = new Superball(argc, argv);
+//	s = new Superball(argc, argv);
 
-	std::vector<dset> dsets = sb_analyze(argc, argv, s);
+//	std::vector<dset> dsets = sb_analyze(argc, argv, s);
 
-	for (int i = 0; i < dsets.size(); i++) {
-		std::printf("Size: %3d  Character: %2c  Scoring cell: (%d,%d)\n",
-			dsets[i].pixels.size(),
-			dsets[i].piece,
-			dsets[i].pixels[0].x,
-			dsets[i].pixels[0].y
-		);
-	}//for (i < dsets.size())
+//	pixel a(-1,0),
+//			b(0,0);
+
+/*	for (int i = 0; i < s->r*s->c; i++) {
+		std::cout << "Looking for pieces..." << std::endl;
+		if (s->board[i] != '.' && s->board[i] != '*')
+			if (a.x == -1) {
+				a.x = i/s->c;
+				a.y = i%s->c;
+			} else {
+				b.x = i/s->c;
+				b.y = i%s->c;
+				break;
+			}
+	}//for*/
+
+	std::printf("SWAP 0 0 0 1\n");//, a.x, a.y, b.x, b.y);
+	
 	return 0;
 }//main
