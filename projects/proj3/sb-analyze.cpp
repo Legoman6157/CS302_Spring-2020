@@ -13,6 +13,20 @@ using namespace std;
 
 #define talloc(type, num) (type *) malloc(sizeof(type)*(num))
 
+struct pixel {
+	int x,
+		 y;
+	
+	pixel() {};
+	pixel(int n_x, int n_y): x(n_x), y(n_y) {};
+};//pixel
+
+struct dset {
+	char piece;
+	std::vector<pixel> pixels;
+	int score;
+};//dset
+
 class Superball {
 	public:
 		Superball(int argc, char **argv);
@@ -82,12 +96,42 @@ Superball::Superball(int argc, char **argv)
 	}
 }
 
-struct dset {
-	char piece;
-	std::vector<pixel> pixels;
-	int score;
-};//dset
-/*
+
+
+std::vector<pixel> sb_read(int argc, char **argv, Superball *s)
+{
+	std::vector<pixel> pieces;
+
+	int i, j;
+
+	//Number of goal pieces and total score of all goal pieces
+	int ngoal, tgoal;
+ 
+	tgoal = 0;
+	ngoal = 0;
+
+	//For all pixels in board,
+	for (i = 0; i < s->r*s->c; i++) {
+		//If it's a goal piece and it's not an empty space,
+		if (s->goals[i] && s->board[i] != '*') {
+
+			//Push it to the vector containing goal pieces.
+			pieces.push_back(pixel(i/s->c, i%s->c));
+
+			//Add score of piece to total score sum
+			tgoal += s->colors[s->board[i]];
+
+			//Incerement number of goal pieces
+			ngoal++;
+
+		}//if (s->goals[i] && s->board[i] != '*')
+	}//for (i < s->r*s->c)
+
+	return pieces;
+}
+
+
+
 std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 	DisjointSetByRankWPC ds(s->r*s->c);
 
@@ -197,36 +241,28 @@ std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 
 	}//for (i < goal_pieces.size())
 
-for (int i = 0; i < dsets.size(); i++) {
-		std::printf("Size: %3d  Character: %2c  Scoring cell: (%d,%d)\n",
-			dsets[i].pixels.size(),
-			dsets[i].piece,
-			dsets[i].pixels[0].x,
-			dsets[i].pixels[0].y
-		);
-	}//for (i < dsets.size())
-
 
 	return dsets;
 }//find_dsets(read_data rd)
-*/
+
+
 int main(int argc, char* argv[]) {
-	std::ofstream o_f ("analyze_output");
-	for(int i = 0; i < argc; i++)
-		o_f << argv[i] << std::endl;
-	o_f.close();
 
-//	Superball *s(argc. argv);
+	Superball *s;
 
-//	std::vector<dset> goal_pieces = sb_analyze(argc, argv, s);
+	s = new Superball(argc, argv);
 
-/*	for (int i = 0; i < goal_pieces.size(); i++) {
-		std::cout << "Size: "
-					 << goal_pieces[i].pixels.size()
-					 << '\n';
-		for (auto it : goal_pieces.pixels)
-			std::cout << '(' << it.x << ", " << it.y << ')' << std::endl;
-	}
-*/
+	std::vector<dset> goal_pieces = sb_analyze(argc, argv, s);	
+
+	std::printf("Scoring sets:\n");
+	for (int i = 0; i < goal_pieces.size(); i++) {
+		std::printf("  Size: %2d  Char: %2c  Scoring Cell: (%d,%d)\n",
+			goal_pieces[i].pixels.size(),
+			goal_pieces[i].piece,
+			goal_pieces[i].pixels[0].x,
+			goal_pieces[i].pixels[0].y
+		);
+	}//for (i < goal_pieces.size())
+
 	return 0;
 }

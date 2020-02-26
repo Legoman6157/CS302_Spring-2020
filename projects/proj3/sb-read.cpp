@@ -29,11 +29,6 @@ class Superball {
 		vector <int> colors;
 };
 
-struct read_data {
-	Superball *s;
-	std::vector<pixel> goal_pieces; 
-};
-
 void usage(const char *s) 
 {
 	fprintf(stderr, "usage: sb-read rows cols min-score-size colors\n");
