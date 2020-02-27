@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -241,6 +242,10 @@ std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 }//find_dsets(read_data rd)
 
 
+bool operator<(dset a, dset b) {
+	return a.pixels.size() < b.pixels.size();
+}
+
 
 std::vector<pixel> get_adjacent_pieces(dset main, Superball *s) {
 	bool visited[s->r*s->c] = {false};
@@ -309,9 +314,6 @@ std::vector<pixel> get_adjacent_pieces(dset main, Superball *s) {
 		}
 	}//while (!main.pixels.empty())
 
-	if (adjacents.empty())
-		adjacents.push_back(pixel(-1, 0));
-
 	return adjacents;
 }//get_adjacent_pieces(dset main, Superball *s)
 
@@ -323,17 +325,33 @@ dset get_biggest_dset(std::vector<dset> dsets) {
 	return biggest;
 }
 
-pixel get_swap_piece(dset biggest_dset, Superball *s) {
+dset get_best_dset(std::vector<dset> dsets, Superball *s) {
 
-	bool visited[s->r*s->c] = {0};
+	std::sort(dsets.begin(), dsets.end());
 
-	for (auto big_dset_pixels_it : biggest_dset.pixels)
-		visited[big_dset_pixels_it.x * s->c + big_dset_pixels_it.y] = true;
+	dset temp = dsets[dsets.size()-1];
+
+	if (get_adjacent_pieces(temp, s).size() == 0)
+		for (int i = dsets.size()-2; i > 0; i--)
+			if (get_adjacent_pieces(dsets[i], s).size() > 0) {
+				temp = dsets[i];
+				break;
+			}
+
+	return temp;
+
+}
+
+pixel get_swap_piece(dset main, Superball *s) {
+
+	bool dset_piece[s->r*s->c] = {0};
+
+	for (auto it : main.pixels)
+		dset_piece[it.x * s->c + it.y] = true;
 
 	for (int i = 0; i < s->r*s->c; i++) {
-		if (!visited[i]
-			 && s->board[i] != '.'
-			 && s->board[i] != '*')
+		if (!dset_piece[i]
+			 && s->board[i] == main.piece)
 			return pixel(i/s->c, i%s->c);
 	}
 	
@@ -357,32 +375,7 @@ void score(pixel a) {
 }//score(pixel a)
 
 
-int main(int argc, char **argv)
-{
-	std::ofstream o_f;
-
-	o_f.open("play_output", std::ios_base::app);
-
-	Superball *s;
-
-	s = new Superball(argc, argv);
-
-	//This gets all disjoint sets with a goal piece, which is at 0 of their pixels.
-	std::vector<dset> dsets = sb_analyze(argc, argv, s);
-
-	for (int i = 0; i < s->r; i++) {
-		for (int j = 0; j < s->c; j++) 
-			o_f << (char)s->board[i * s->c + j];
-		o_f << '\n';
-	}
-
-	for (auto it : dsets) {
-		o_f << it.pixels[0].x << ',' << it.pixels[0].y << ": " << get_adjacent_pieces(it, s).size() << '\n';
-		for (auto it2 : get_adjacent_pieces(it, s))
-			o_f << it2.x << ',' << it2.y << '\n';
-	}
-
-	o_f << "\n\n";
+void swap_random_pieces(Superball *s) {
 
 	pixel a(-1, 0), b;
 
@@ -396,14 +389,47 @@ int main(int argc, char **argv)
 				b.x = i/s->c;
 				b.y = i%s->c;
 			}
-	
-	std::cout << "SWAP "<< a.x << ' ' << a.y << ' ' << b.x << ' ' << b.y << std::endl;	
+	swap(a, b);
+}
 
+int main(int argc, char **argv)
+{
+	Superball *s;
 
+	s = new Superball(argc, argv);
+
+	//This gets all disjoint sets with a goal piece, which is at 0 of their pixels.
+	std::vector<dset> dsets = sb_analyze(argc, argv, s);
+
+	if (dsets.size() == 0) {
+		swap_random_pieces(s);
+	} else {
+
+		if (s->empty < 20) {
+			score(get_biggest_dset(dsets).pixels[0]);
+		} else {
+			dset best_dset = get_best_dset(dsets, s);
+			std::vector<pixel> adjacent_pieces = get_adjacent_pieces(best_dset, s);
+
+			if (adjacent_pieces.size() == 0) {
+				swap_random_pieces(s);
+			} else {
+
+				pixel adjacent_piece = adjacent_pieces[0],
+						swap_piece = get_swap_piece(best_dset, s);
+				
+				if (swap_piece.x == -1) {
+					swap_piece = get_random_piece(adjacent_piece, s);
+				}
+
+				swap(adjacent_piece, swap_piece);
+
+			}// if (get_adjacent_pieces(best_dset, s).size() == 0) / else
+		}//if (s->empty < 20)
+
+	}//if (dsets.size() == 0) / else
 
 	delete s;
-
-	o_f.close();
 
 	return 0;
 }//main
