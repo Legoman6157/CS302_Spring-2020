@@ -128,10 +128,12 @@ std::vector<pixel> sb_read(int argc, char **argv, Superball *s)
 	return pieces;
 }
 
-std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
+std::vector<dset> sb_analyze(Superball *s) {
+	//Disjoint sets
 	DisjointSetByRankWPC ds(s->r*s->c);
 
-	std::vector<pixel> goal_pieces = sb_read(argc, argv, s);
+	//List of all goal pieces
+	std::vector<pixel> goal_pieces = sb_read(s);
 
 	//Vector of disjoint sets to return
 	std::vector<dset> dsets;
@@ -146,25 +148,31 @@ std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 	//Buffer dset for putting into dsets vector
 	dset temp_dset;
 
+	//Variables for the current cell and its neighbors
 	int curr_pixel_loc,
 		 north_loc,
 		 east_loc,
 		 west_loc,
 		 south_loc;
 
+	//For all goal pieces,
 	for (int i = 0; i < goal_pieces.size(); i++) {
 		dfs_stack.push(goal_pieces[i]);
 
+		//Free the temporary disjoint set's array of pixels and push the front pixel
+		//	of the list of goal pieces
 		temp_dset.pixels.clear();
 		temp_dset.pixels.push_back(goal_pieces[i]);
 
+		//Setting the disjoint set's piece (colour)
 		temp_dset.piece = s->board[(goal_pieces[i].x) * s->c + (goal_pieces[i].y)];
 
+		//While there's still pixels on the stack,
 		while (!dfs_stack.empty()) {
 			curr_pixel = dfs_stack.top();
 			dfs_stack.pop();
 
-			//Set location of current pixel and possible "movements" for traversal
+			//Set location of current pixel it neighbors
 			curr_pixel_loc = (curr_pixel.x) * s->c + (curr_pixel.y);
 			north_loc = (curr_pixel.x-1) * s->c + (curr_pixel.y);
 			east_loc = (curr_pixel.x) * s->c + (curr_pixel.y+1);
@@ -172,65 +180,88 @@ std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 			south_loc = (curr_pixel.x+1) * s->c + (curr_pixel.y);
 
 			//(N) Check North
+			//If the current pixel is below the top row,
+			//	and the north and current pixels have different parents
+			//	and the north and current piece match,
 			if ( (curr_pixel.x > 0)
 					&& (ds.Find(north_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[north_loc] == s->board[curr_pixel_loc]) ) {
 
+				//Match them
 				ds.Union(ds.Find(north_loc), ds.Find(curr_pixel_loc));
 
+				//Set the temporary pixel's x and y to north's
 				temp_pixel.x = north_loc/s->c;
 				temp_pixel.y = north_loc%s->c;
 
-				dfs_stack.push(pixel(temp_pixel));
+				dfs_stack.push(temp_pixel);
 				temp_dset.pixels.push_back(temp_pixel);
 			}
 
 			//(E) Check East
+			//If the current pixel is below the top row,
+			//	and the east and current pixels have different parents
+			//	and the east and current piece match,
 			if ( (curr_pixel.y < s->c-1)
 					&& (ds.Find(east_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[east_loc] == s->board[curr_pixel_loc]) ) {
 
+				//Match them
 				ds.Union(ds.Find(east_loc), ds.Find(curr_pixel_loc));
 
+				//Set the temporary pixel's x and y to east's
 				temp_pixel.x = east_loc/s->c;
 				temp_pixel.y = east_loc%s->c;
 
-				dfs_stack.push(pixel(temp_pixel));
+				dfs_stack.push(temp_pixel);
 				temp_dset.pixels.push_back(temp_pixel);
 			}
 
-			//(W) Check Weast
+			//(W) Check West
+			//If the current pixel is below the top row,
+			//	and the west and current pixels have different parents
+			//	and the west and current piece match,
 			if ( (curr_pixel.y > 0)
 					&& (ds.Find(west_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[west_loc] == s->board[curr_pixel_loc]) ) {
 
+				//Match them
 				ds.Union(ds.Find(west_loc), ds.Find(curr_pixel_loc));
 
+				//Set the temporary pixel's x and y to west's
 				temp_pixel.x = west_loc/s->c;
 				temp_pixel.y = west_loc%s->c;
 
-				dfs_stack.push(pixel(temp_pixel));
+				dfs_stack.push(temp_pixel);
 				temp_dset.pixels.push_back(temp_pixel);
 			}
 
 			//(S) Check South
-			if ( (curr_pixel.x < s->r-1)
+			//If the current pixel is below the top row,
+			//	and the south and current pixels have different parents
+			//	and the south and current piece match,
+			if ( (curr_pixel.x <  s->r-1)
 					&& (ds.Find(south_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[south_loc] == s->board[curr_pixel_loc]) ) {
 
+				//Match them
 				ds.Union(ds.Find(south_loc), ds.Find(curr_pixel_loc));
 
+				//Set the temporary pixel's x and y to south's
 				temp_pixel.x = south_loc/s->c;
 				temp_pixel.y = south_loc%s->c;
 
-				dfs_stack.push(pixel(temp_pixel));
+				dfs_stack.push(temp_pixel);
 				temp_dset.pixels.push_back(temp_pixel);
 			}
+
 		}//while (!dfs_stack.empty())
 
-		curr_pixel_loc = (temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y);
 
-		if (curr_pixel_loc == ds.Find(curr_pixel_loc) ) {
+		//This little section is to make sure I don't push a size 1 dset with a goal piece that's
+		//	in another dset.
+		pixel temp_pixel_loc = (temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y);
+		if (curr_pixel_loc == ds.Find(temp_pixel_loc) ) {
 			temp_dset.score = s->colors[temp_dset.piece] * temp_dset.pixels.size();
 			dsets.push_back(temp_dset);
 		}
@@ -241,27 +272,36 @@ std::vector<dset> sb_analyze(int argc, char* argv[], Superball *s) {
 	return dsets;
 }//find_dsets(read_data rd)
 
-
 bool operator<(dset a, dset b) {
 	return a.pixels.size() < b.pixels.size();
 }
 
 
 std::vector<pixel> get_adjacent_pieces(dset main, Superball *s) {
-	bool visited[s->r*s->c] = {false};
+	int N = s->r*s->c;
 
+	//Whether or not a cell has been visited
+	bool visited[N];
+
+	//Set all to false (g++ isn't set to c++11 by default)
+	for (int i = 0; i < N; i++)
+		visited[i] = false;
+
+	//List of all adjacent pixels
 	std::vector<pixel> adjacents;
 
+	//Pixel for traversal and pixel for adding
 	pixel curr_pixel,
 			temp_pixel;
 	
+	//Locations of current pixel and its neighbors 
 	int curr_pixel_loc,
 		 north_loc,
 		 east_loc,
 		 west_loc,
 		 south_loc;
 
-
+	//While the list of pixels in main dset isn't empty (copied version)
 	while (!main.pixels.empty()) {
 		curr_pixel = main.pixels.back();
 		main.pixels.pop_back();
@@ -274,6 +314,7 @@ std::vector<pixel> get_adjacent_pieces(dset main, Superball *s) {
 		south_loc = (curr_pixel.x+1) * s->c + (curr_pixel.y);
 
 		//(N) Check North
+		//If current 
 		if ( (curr_pixel.x > 0)
 				&& (s->board[north_loc] != main.piece)
 				&& (s->board[north_loc] != '.')
@@ -344,7 +385,12 @@ dset get_best_dset(std::vector<dset> dsets, Superball *s) {
 
 pixel get_swap_piece(dset main, Superball *s) {
 
-	bool dset_piece[s->r*s->c] = {0};
+	int N = s->r*s->c;
+
+	bool dset_piece[N];
+
+	for (int i = 0; i < N; i++)
+		dset_piece[i] = false;
 
 	for (auto it : main.pixels)
 		dset_piece[it.x * s->c + it.y] = true;
@@ -406,7 +452,11 @@ int main(int argc, char **argv)
 	} else {
 
 		if (s->empty < 20) {
-			score(get_biggest_dset(dsets).pixels[0]);
+			dset biggest_dset = get_biggest_dset(dsets);
+			if (biggest_dset.pixels.size() > 5)
+				score(biggest_dset.pixels[0]);
+			else
+				swap_random_pieces(s);
 		} else {
 			dset best_dset = get_best_dset(dsets, s);
 			std::vector<pixel> adjacent_pieces = get_adjacent_pieces(best_dset, s);
