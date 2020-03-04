@@ -86,7 +86,7 @@ Superball::Superball(int argc, char **argv)
 	}
 }
 
-std::vector<pixel> sb_read(int argc, char **argv, Superball *s)
+std::vector<pixel> sb_read(Superball *s)
 {
 	std::vector<pixel> pieces;
 
@@ -124,8 +124,9 @@ std::vector<pixel> sb_read(int argc, char **argv, Superball *s)
 }
 
 int main(int argc, char* argv[]) {
-	std::ofstream o_f("read-output");
-	for(int i = 0; i < argc; i++)
-		o_f << argv[i] << std::endl;
-	o_f.close();
+	Superball *s;
+
+	s = new Superball(argc, argv);
+
+	sb_read(s);
 }
