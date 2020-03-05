@@ -1,6 +1,7 @@
 template <typename T>
 class Matrix {
-	private:
+//	private:
+	public:
 		T **matrix;
 
 	public:
@@ -8,6 +9,12 @@ class Matrix {
 			 N_cols,
 			 N;
 
+		Matrix() {
+			N_rows = 0;
+			N_cols = 0;
+			N = 0;
+			matrix = NULL;
+		}
 		Matrix(int n_N_rows, int n_N_cols): N_rows(n_N_rows), N_cols(n_N_cols) {
 			matrix = new T* [N_rows];
 
@@ -16,17 +23,21 @@ class Matrix {
 		}//Matrix(int n_N_rows, int n_N_cols)
 
 		~Matrix() {
-			for (int i = 0; i < N_rows; i++)
-				delete matrix[i];
-
-			delete [] matrix;
+			if (matrix) {
+				for (int i = 0; i < N_rows; i++)
+					delete matrix[i];
+	
+				delete [] matrix;
+			}
 		}//~Matrix
 
 		void resize(int n_N_rows, int n_N_cols) {
-			for (int i = 0; i < N_rows; i++)
-				delete matrix[i];
-
-			delete [] matrix;
+			if (matrix) {
+				for (int i = 0; i < N_rows; i++)
+					delete matrix[i];
+	
+				delete [] matrix;
+			}
 
 			matrix = new T* [N_rows];
 
