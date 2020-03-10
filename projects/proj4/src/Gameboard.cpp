@@ -27,10 +27,9 @@ void Gameboard::read_board() {
 		}// for (j < N_cols)
 	}//for (i < N_rows)
 
-	std::cout << "Printing board:" << std::endl;
-	for (int i = 0; i < N_rows; i++) {
-		for (int j = 0; j < N_cols; j++)
-			std::cout << board[i][j];
-		std::cout << std::endl;
-	}
+	std::cin >> source.x >> source.y;
+	std::cin >> sink.x >> sink.y;
+
+	std::cout << source.x << ' ' << source.y << std::endl;
+	std::cout << sink.x << ' ' << sink.y << std::endl;
 }//read_board
