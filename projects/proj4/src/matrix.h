@@ -39,6 +39,9 @@ class Matrix {
 				delete [] matrix;
 			}
 
+			N_rows = n_N_rows;
+			N_cols = n_N_cols;
+
 			matrix = new T* [N_rows];
 
 			for (int i = 0; i < N_rows; i++)
