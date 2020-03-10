@@ -20,7 +20,11 @@ class Gameboard {
 		pixel source,
 				sink;
 	public:
-		void read_board();
-		std::vector<pixel> get_shortest_path();
 		char* operator[](int x) { return board[x]; }
+
+		void read_board();
+		int get_cost(char piece);
+
+		const int get_N_rows() const { return N_rows; };
+		const int get_N_cols() const { return N_cols; };
 };//class Gameboard
