@@ -13,8 +13,8 @@ struct pixel {
 
 	pixel() {};
 	pixel(int n_x, int n_y): x(n_x), y(n_y) {};
-	bool operator!=(pixel p) {
-		return (x != p.x) && (y != p.y);
+	bool operator==(pixel &p) {
+		return (x == p.x) && (y == p.y);
 	}
 };//struct pixel
 
