@@ -184,24 +184,24 @@ std::vector<pixel> Gameboard::find_dijkstra_path() {
 
 		switch (get_direction(curr_pixel)) {
 			case N:
+				total_cost += piece_costs[curr_piece];
 				curr_pixel.x -= 1;
 				d_path.push_back(curr_pixel);
-				total_cost = piece_costs[curr_piece];
 				break;
 			case E:
+				total_cost += piece_costs[curr_piece];
 				curr_pixel.y += 1;
 				d_path.push_back(curr_pixel);
-				total_cost = piece_costs[curr_piece];
 				break;
 			case W:
+				total_cost += piece_costs[curr_piece];
 				curr_pixel.y -= 1;
 				d_path.push_back(curr_pixel);
-				total_cost = piece_costs[curr_piece];
 				break;
 			case S:
+				total_cost += piece_costs[curr_piece];
 				curr_pixel.x += 1;
 				d_path.push_back(curr_pixel);
-				total_cost = piece_costs[curr_piece];
 				break;
 
 			case Z:
@@ -209,7 +209,8 @@ std::vector<pixel> Gameboard::find_dijkstra_path() {
 				total_cost -= piece_costs[curr_piece];
 				d_path.pop_back();
 				curr_pixel = d_path.back();
-		}
+		}//switch (get_direction(curr_pixel))
+
 		std::cout << "\tCurrent state of loop condition: " << ((!d_path.empty()) && (curr_pixel == sink)) << std::endl;
 		std::cout << "\t\tnot empty: " << (!d_path.empty()) << std::endl;
 		std::cout << "\t\tnot at sink: " << !(curr_pixel == sink) << std::endl;
@@ -227,7 +228,7 @@ std::vector<pixel> Gameboard::find_dijkstra_path() {
 
 	std::cout << total_cost << std::endl;
 	for (auto it : d_path)
-		std::cout << it.x << ' ' << it.y << std::endl;
+		std::cout << it.x << ' ' << it.y << " (" << board[it.x][it.y] << ')' << std::endl;
 
 	return d_path;
 }
