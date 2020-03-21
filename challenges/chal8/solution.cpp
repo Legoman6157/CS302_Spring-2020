@@ -4,40 +4,62 @@
 #include "link_list.cpp"
 
 int main() {
+	LinkedList<int> ll1,
+						 ll2,
+						 ll3;
+
+	LinkedList<int>::Node *it1,
+								 *it2,
+								 *it3;
+
 	std::string num1,
 					num2;
-	
+
 	int carry = 0;
 
-	while (std::cin >> num1 >> num2) {	
-		std::cout << "Given numbers: " << num1 << ' ' << num2 << std::endl;
-		LinkedList<int> ll1;
+	while (std::cin >> num1 >> num2) {
 		for (int i = 0; i < num1.size(); i++)
 			ll1.push_front(num1[i]-'0');
-		
-		LinkedList<int> ll2;
-		for (int i = 0; i < num2.size(); i++)
-			ll2.push_front(num2[i]-'0');
 
-		LinkedList<int>::Node* temp1 = ll1.head;
-		LinkedList<int>::Node* temp2 = ll2.head;
-		for (; (temp1 != NULL && temp2 != NULL); temp1 = temp1->next, temp2 = temp2->next) {
-			temp1->data = (temp1->data + temp2->data) + carry;
-			if (temp1->data >= 10) {
-				temp1->data %= 10;
-				if (temp1->next == NULL)
-					ll1.push_back(1);
-				else
-					carry = 1;
+		for (int j = 0; j < num2.size(); j++)
+			ll2.push_front(num2[j]-'0');
+
+		it1 = ll1.head;
+		it2 = ll2.head;
+
+		while ((it1 != NULL) || (it2 != NULL)) {
+			if (it1 && it2)
+				ll3.push_back(it1->data + it2->data + carry);
+			else if (it1)
+				ll3.push_back(it1->data + carry);
+			else
+				ll3.push_back(it2->data + carry);
+
+			if (ll3.tail->data >= 10) {
+				ll3.tail->data %= 10;
+				carry = 1;
 			} else
 				carry = 0;
+
+			if (it1)
+				it1 = it1->next;
+			if (it2)
+				it2 = it2->next;
+		}//while ((it1 != NULL) || (it2 != NULL))
+
+		if (carry == 1) {
+			ll3.push_back(1);
+			carry = 0;
 		}
 
-		temp1 = ll1.tail;
-		while (temp1 != NULL) {
-			std::cout << temp1->data;
-			temp1 = temp1->last;
-		}
+		it3 = ll3.tail;
+		for (; it3 != NULL; it3 = it3->last)
+			std::cout << it3->data;
+
 		std::cout << std::endl;
+
+		ll1.clear();
+		ll2.clear();
+		ll3.clear();
 	}
 }//main

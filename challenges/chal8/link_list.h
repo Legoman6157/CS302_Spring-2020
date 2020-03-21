@@ -31,4 +31,6 @@ class LinkedList {
 
 		void push_front(T n_data);
 		void push_back(T n_data);
+		void reserve(int size);
+		void clear();
 };//LinkedList
