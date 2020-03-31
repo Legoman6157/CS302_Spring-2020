@@ -461,14 +461,12 @@ void swap_random_pieces(Superball *s) {
 
 int main(int argc, char **argv)
 {
+
 	std::ofstream o_f;
-	o_f.open("play_output.txt");
+	o_f.open("play_output.txt", std::ios_base::app);
 	Superball *s;
 
 	s = new Superball(argc, argv);
-
-	//This gets all disjoint sets with a goal piece, which is at 0 of their pixels.
-	std::vector<dset> dsets = sb_analyze(s);
 
 	for (int i = 0; i < s->r*s->c; i++) {
 		o_f << (char)(s->board[i]);
@@ -476,14 +474,22 @@ int main(int argc, char **argv)
 			o_f << '\n';
 	}
 
+	o_f << "Getting dsets with goal pieces...\n";
+	//This gets all disjoint sets with a goal piece.
+	std::vector<dset> dsets = sb_analyze(s);
+
+	std::sort(dsets.begin(), dsets.end());
+
 	if (dsets.size() == 0) {
+		o_f << "No dsets have goal pieces.\n";
+		o_f << "Swap random pieces\n";
 		swap_random_pieces(s);
-		o_f << "Swap random pieces";
 	} else {
+		o_f << "Have dsets with goal pieces.\n";
 		dset biggest_dset = get_best_score_dset(dsets, s);
 
-		if (biggest_dset.pixels.size() >= s->mss) {
-
+		if (biggest_dset.pixels.size() >= s->mss && s->empty < 20) {
+			o_f << "Disjoint set exists with goal pieces.\n";
 			int i = 0;
 			while (i < biggest_dset.pixels.size() && (s->goals[(biggest_dset.pixels[i].x) * s->c + biggest_dset.pixels[i].y] != 1)) {i++;}
 
@@ -491,31 +497,36 @@ int main(int argc, char **argv)
 			for (auto it : biggest_dset.pixels)
 				o_f << it.x << ' ' << it.y << '\n';
 
-			if (i == biggest_dset.pixels.size()-1 && (s->goals[(biggest_dset.pixels[i].x) * s->c + biggest_dset.pixels[i].y] != 1))
-				swap_random_pieces(s);
-			else
+//			if (i == biggest_dset.pixels.size()-1 && (s->goals[(biggest_dset.pixels[i].x) * s->c + biggest_dset.pixels[i].y] != 1))
+//				swap_random_pieces(s);
+//			else
 				score(biggest_dset.pixels[i]);
 
-			o_f << "Score " << biggest_dset.pixels[i].x << ' ' << biggest_dset.pixels[i].y;
+			o_f << "Score " << biggest_dset.pixels[i].x << ' ' << biggest_dset.pixels[i].y << '\n';
 		} else {
+			o_f << "No dset large enough to score.\n";
+			o_f << "Getting dset with adjacent pieces...\n";
 			dset best_dset = get_best_dset(dsets, s);
 			std::vector<pixel> adjacent_pieces = get_adjacent_pieces(best_dset, s);
 
 			if (adjacent_pieces.size() == 0) {
+				o_f << "No dset with adjacent pieces.\n";
+				o_f << "Swapping random pieces...\n";
 				swap_random_pieces(s);
-				o_f << "Swap random pieces";
 			} else {
 
+				o_f << "Trying to get adjacent piece...\n";
 				pixel adjacent_piece = adjacent_pieces[0],
 						swap_piece = get_swap_piece(best_dset, s);
 				
 				if (swap_piece.x == -1) {
+					o_f << "No swap piece available.\n";
+					o_f << "Getting random swap piece...\n";
 					swap_piece = get_random_piece(adjacent_piece, s);
-					o_f << "Getting random swap piece\n";
 				}
 
+				o_f << "Have adjacent piece.\n";
 				swap(adjacent_piece, swap_piece);
-				o_f << "Have adjacent piece";
 
 			}// if (get_adjacent_pieces(best_dset, s).size() == 0) / else
 		}//if (s->empty < 20)
