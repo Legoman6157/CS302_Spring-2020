@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
-#include <fstream>
 #include <iostream>
 #include <stack>
 #include <vector>
@@ -111,7 +110,7 @@ std::vector<pixel> sb_read(Superball *s)
 	//For all pixels in board,
 	for (i = 0; i < s->r*s->c; i++) {
 		//If it's a goal piece and it's not an empty space,
-		if (s->goals[i] && s->board[i] != '*') {
+		if ((s->board[i] != '.') && (s->board[i] != '*')) {
 
 			//Push it to the vector containing goal pieces.
 			pieces.push_back(pixel(i/s->c, i%s->c));
@@ -129,7 +128,6 @@ std::vector<pixel> sb_read(Superball *s)
 }
 
 std::vector<dset> sb_analyze(Superball *s) {
-	//Disjoint sets
 	DisjointSetByRankWPC ds(s->r*s->c);
 
 	//List of all goal pieces
@@ -173,6 +171,7 @@ std::vector<dset> sb_analyze(Superball *s) {
 			dfs_stack.pop();
 
 			//Set location of current pixel it neighbors
+			//Set location of current pixel and possible "movements" for traversal
 			curr_pixel_loc = (curr_pixel.x) * s->c + (curr_pixel.y);
 			north_loc = (curr_pixel.x-1) * s->c + (curr_pixel.y);
 			east_loc = (curr_pixel.x) * s->c + (curr_pixel.y+1);
@@ -195,6 +194,7 @@ std::vector<dset> sb_analyze(Superball *s) {
 				temp_pixel.y = north_loc%s->c;
 
 				dfs_stack.push(temp_pixel);
+				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
 			}
 
@@ -214,6 +214,7 @@ std::vector<dset> sb_analyze(Superball *s) {
 				temp_pixel.y = east_loc%s->c;
 
 				dfs_stack.push(temp_pixel);
+				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
 			}
 
@@ -233,6 +234,7 @@ std::vector<dset> sb_analyze(Superball *s) {
 				temp_pixel.y = west_loc%s->c;
 
 				dfs_stack.push(temp_pixel);
+				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
 			}
 
@@ -240,7 +242,7 @@ std::vector<dset> sb_analyze(Superball *s) {
 			//If the current pixel is below the top row,
 			//	and the south and current pixels have different parents
 			//	and the south and current piece match,
-			if ( (curr_pixel.x <  s->r-1)
+			if ( (curr_pixel.x < s->r-1)
 					&& (ds.Find(south_loc) != ds.Find(curr_pixel_loc))
 					&& (s->board[south_loc] == s->board[curr_pixel_loc]) ) {
 
@@ -252,16 +254,18 @@ std::vector<dset> sb_analyze(Superball *s) {
 				temp_pixel.y = south_loc%s->c;
 
 				dfs_stack.push(temp_pixel);
+				dfs_stack.push(pixel(temp_pixel));
 				temp_dset.pixels.push_back(temp_pixel);
 			}
 
 		}//while (!dfs_stack.empty())
 
+		curr_pixel_loc = (temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y);
 
 		//This little section is to make sure I don't push a size 1 dset with a goal piece that's
 		//	in another dset.
-		pixel temp_pixel_loc = (temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y);
-		if (curr_pixel_loc == ds.Find(temp_pixel_loc) ) {
+		int temp_pixel_loc = (temp_dset.pixels[0].x) * s->c + (temp_dset.pixels[0].y);
+		if (curr_pixel_loc == ds.Find(curr_pixel_loc) && temp_dset.pixels.size() >= 2) {
 			temp_dset.score = s->colors[temp_dset.piece] * temp_dset.pixels.size();
 			dsets.push_back(temp_dset);
 		}
@@ -272,11 +276,8 @@ std::vector<dset> sb_analyze(Superball *s) {
 	return dsets;
 }//find_dsets(read_data rd)
 
+
 int main(int argc, char* argv[]) {
-
-	std::ofstream o_f;
-
-	o_f.open("analyze_debug", std::ios_base::app);
 
 	Superball *s;
 
@@ -293,14 +294,6 @@ int main(int argc, char* argv[]) {
 			goal_pieces[i].pixels[0].y
 		);
 	}//for (i < goal_pieces.size())
-
-	for (int i = 0; i < s->r; i++) {
-		for (int j = 0; j < s->c; j++)
-			o_f << (char)s->board[i * s->c + j];
-		o_f << '\n';
-	}
-
-	o_f.close();
 
 	return 0;
 }
